@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>职业规划问卷 · 智能分析版</title>
+  <style>
+    body {
+      font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 25px;
+    }
+    .section {
+      display: none;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .role-select {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .role-btn {
+      padding: 14px 32px;
+      margin: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .student-btn {
+      background: #3498db;
+      color: white;
+    }
+    .parent-btn {
+      background: #2ecc71;
+      color: white;
+    }
+    .student-btn:hover { background: #2980b9; }
+    .parent-btn:hover { background: #27ae60; }
+
+    .question {
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px dashed #eee;
+    }
+    .question-text {
+      font-weight: bold;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .options label {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      background: #f9fbfd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .options input {
+      margin-right: 10px;
+    }
+    .options label:hover {
+      background: #eef5ff;
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .prev-btn { background: #95a5a6; color: white; }
+    .next-btn { background: #3498db; color: white; }
+    .submit-btn { background: #e74c3c; color: white; width: 100%; padding: 14px; margin-top: 20px; }
+    .prev-btn:hover { background: #7f8c8d; }
+    .next-btn:hover { background: #2980b9; }
+    .submit-btn:hover { background: #c0392b; }
+
+    #result-section h2 {
+      color: #2c3e50;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #result {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      max-height: 500px;
+      overflow-y: auto;
+      border: 1px solid #e0e6ed;
+    }
+    .download-btn, .restart-btn {
+      display: block;
+      width: 240px;
+      margin: 15px auto;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      border: none;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .download-btn {
+      background: #27ae60;
+      box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+    }
+    .restart-btn {
+      background: #9b59b6;
+      box-shadow: 0 4px 12px rgba(155, 89, 182, 0.4);
+    }
+    .download-btn:hover { background: #219653; transform: translateY(-2px); }
+    .restart-btn:hover { background: #8e44ad; transform: translateY(-2px); }
+
+    /* 跳转按钮样式 */
+    .coze-link {
+      display: block;
+      width: 240px;
+      margin: 15px auto;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-decoration: none;
+      background: #e74c3c;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+      transition: background 0.3s, transform 0.2s;
+    }
+    .coze-link:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 职业规划智能分析问卷</h1>
+
+    <!-- 角色选择 -->
+    <div id="role-section" class="section" style="display:block;">
+      <p style="text-align:center; font-size:18px;">请选择您的身份：</p>
+      <div class="role-select">
+        <button class="role-btn student-btn" onclick="startSurvey('student')">我是学生</button>
+        <button class="role-btn parent-btn" onclick="startSurvey('parent')">我是家长</button>
+      </div>
+    </div>
+
+    <!-- 问卷部分 -->
+    <div id="survey-section" class="section">
+      <div id="questions-container"></div>
+      <div class="nav-buttons">
+        <button class="btn prev-btn" onclick="prevPage()">上一页</button>
+        <button class="btn next-btn" onclick="nextPage()">下一页</button>
+        <button class="btn submit-btn" id="submitBtn" onclick="submitSurvey()" style="display:none;">提交问卷</button>
+      </div>
+    </div>
+
+    <!-- 结果展示 -->
+    <div id="result-section" class="section">
+      <h2>📊 您的职业发展分析报告</h2>
+      <div id="result"></div>
+      <button class="download-btn" onclick="downloadReport()">📥 下载分析报告 (.txt)</button>
+      <button class="restart-btn" onclick="location.reload()">🔄 重新开始</button>
+      <a href="https://www.coze.cn/store/agent/7568876961461207040?bot_id=true" target="_blank" class="coze-link">
+        🤖 进入职业规划 AI 助手
+      </a>
+    </div>
+  </div>
+
+  <script>
+    let currentRole = '';
+    let currentPage = 0;
+    const pageSize = 5;
+    let userAnswers = {};
+
+    // 学生问卷题目（30题）
+    const studentQuestions = [
+      { text: "你目前就读的阶段是？", type: "single", options: ["初中", "高中", "大学本科", "研究生及以上"] },
+      { text: "你的性别是？", type: "single", options: ["男", "女", "其他/不愿透露"] },
+      { text: "你所在的学科/专业方向属于？（可多选）", type: "multiple", options: ["理工类（如数学、物理、计算机）", "经管类（如经济、金融、管理）", "人文社科（如历史、哲学、社会学）", "艺术设计（如美术、音乐、传媒）", "医学健康", "其他"] },
+      { text: "你平时最喜欢做什么类型的事情？", type: "single", options: ["解决复杂问题", "与人沟通合作", "创作或表达", "动手实践操作", "组织协调事务"] },
+      { text: "你在学习中最擅长的科目是？", type: "single", options: ["数理化/信息技术", "语文/外语/历史", "艺术/体育", "商科/经济", "生物/医学"] },
+      { text: "你是否参加过职业体验或实习活动？", type: "single", options: ["多次参与", "参加过1-2次", "从未参与但有兴趣", "不感兴趣"] },
+      { text: "你希望未来的工作具有哪些特点？（可多选）", type: "multiple", options: ["高收入", "稳定性强", "有创造力", "帮助他人", "自由灵活", "技术前沿"] },
+      { text: "面对未来的不确定性，你的感受是？", type: "single", options: ["充满期待，愿意尝试", "有些焦虑但积极应对", "比较迷茫", "顺其自然，不太关心"] },
+      { text: "你是否会主动了解不同职业的信息？", type: "single", options: ["经常了解", "偶尔看看", "很少关注", "完全不看"] },
+      { text: "你认为自己的性格更偏向？", type: "single", options: ["外向、热情", "内向、沉稳", "理性、逻辑强", "感性、富有同理心"] },
+      { text: "你是否曾认真思考过自己适合什么职业？", type: "single", options: ["深入思考过，并有方向", "想过但没结论", "很少想", "从未想过"] },
+      { text: "你获取职业信息的主要渠道是？（可多选）", type: "multiple", options: ["网络搜索/社交媒体", "学校课程或讲座", "家人朋友介绍", "书籍或纪录片", "实习实践"] },
+      { text: "你是否愿意为理想职业付出长期努力？", type: "single", options: ["非常愿意", "愿意但要看情况", "不太确定", "不愿意"] },
+      { text: "你最看重职业发展的哪个方面？", type: "single", options: ["个人成长", "薪资待遇", "工作生活平衡", "社会价值"] },
+      { text: "你是否有明确的梦想职业？", type: "single", options: ["有，且很坚定", "有，但可能改变", "没有，但有感兴趣领域", "完全没有想法"] },
+      { text: "如果梦想职业竞争激烈，你会？", type: "single", options: ["全力以赴争取", "作为备选之一", "放弃，选择更稳妥路径", "不知道"] },
+      { text: "你是否清楚该职业的具体要求（如学历、技能）？", type: "single", options: ["非常清楚", "大概了解", "不太清楚", "完全不了解"] },
+      { text: "你是否会制定学习或发展规划？", type: "single", options: ["会，且定期调整", "会，但执行不力", "想过但没行动", "从不制定"] },
+      { text: "你希望学校提供哪种职业支持？（可多选）", type: "multiple", options: ["企业参访或实习推荐", "职业测评与一对一咨询", "行业大咖讲座", "简历与面试培训", "创业指导"] },
+      { text: "你是否愿意尝试新兴职业（如AI训练师、碳中和顾问）？", type: "single", options: ["非常愿意", "可以考虑", "持观望态度", "更倾向传统职业"] },
+      { text: "你认为家庭对你职业选择的影响程度？", type: "single", options: ["很大，会优先考虑家人意见", "有一定影响", "影响很小", "完全不影响"] },
+      { text: "你是否担心未来找不到理想工作？", type: "single", options: ["非常担心", "有点担心", "不太担心", "完全不担心"] },
+      { text: "你是否愿意异地或出国发展？", type: "single", options: ["愿意", "视情况而定", "不太愿意", "坚决不愿"] },
+      { text: "你认为自己的抗压能力如何？", type: "single", options: ["很强", "一般", "较弱", "很差"] },
+      { text: "你是否愿意持续学习新技能？", type: "single", options: ["非常愿意", "愿意", "看是否必要", "不愿意"] },
+      { text: "你更倾向于哪种工作环境？", type: "single", options: ["快节奏、高挑战", "稳定有序", "自由灵活", "团队协作氛围浓"] },
+      { text: "你是否参与过社团、竞赛或项目？", type: "single", options: ["多次参与并担任骨干", "参与过几次", "很少参与", "从未参与"] },
+      { text: "你是否已有初步的职业行动计划？", type: "single", options: ["有详细计划", "有大致方向", "完全没有", "觉得还早"] },
+      { text: "你希望未来的工作能带来什么？", type: "single", options: ["成就感", "经济保障", "社会认可", "自我实现"] },
+      { text: "最后，请用一句话描述你对未来的期待：", type: "text", options: [] }
+    ];
+
+    // 家长问卷题目（30题）
+    const parentQuestions = [
+      { text: "您与孩子的关系是？", type: "single", options: ["父亲", "母亲", "其他监护人"] },
+      { text: "您的孩子目前处于哪个学习阶段？", type: "single", options: ["小学", "初中", "高中", "大学及以上"] },
+      { text: "您的最高学历是？", type: "single", options: ["高中及以下", "大专", "本科", "硕士及以上"] },
+      { text: "您的职业类型属于？", type: "single", options: ["公务员/事业单位", "企业职员", "自由职业", "个体经营", "退休", "其他"] },
+      { text: "您是否了解孩子的兴趣爱好？", type: "single", options: ["非常了解", "基本了解", "不太了解", "完全不了解"] },
+      { text: "您是否与孩子讨论过未来职业？", type: "single", options: ["经常讨论", "偶尔讨论", "很少讨论", "从未讨论"] },
+      { text: "您认为孩子目前是否有明确的职业倾向？", type: "single", options: ["有，且很清晰", "有一些想法", "完全没有", "不清楚"] },
+      { text: "您是否支持孩子选择非传统职业（如电竞、自媒体）？", type: "single", options: ["完全支持", "有条件支持", "不太支持", "坚决反对"] },
+      { text: "当孩子谈到未来时，您通常会？", type: "single", options: ["认真倾听并鼓励", "给出建议", "强调现实困难", "回避话题"] },
+      { text: "您是否愿意为孩子的职业探索提供资源（如资金、人脉）？", type: "single", options: ["非常愿意", "视情况而定", "不太愿意", "无法提供"] },
+      { text: "您最希望孩子未来从事什么类型的工作？", type: "single", options: ["稳定体制内", "高薪企业", "自由职业", "尊重孩子选择"] },
+      { text: "您是否尊重孩子根据兴趣选择职业？", type: "single", options: ["完全尊重", "基本尊重", "会干预", "必须听我的"] },
+      { text: "您是否了解当前热门或新兴职业？", type: "single", options: ["非常了解", "略有了解", "听说过但不清楚", "完全不了解"] },
+      { text: "您是否担心孩子未来就业压力？", type: "single", options: ["非常担心", "有些担心", "不太担心", "不担心"] },
+      { text: "您是否鼓励孩子参加社会实践或实习？", type: "single", options: ["积极鼓励", "支持但不主动", "担心影响学习", "反对"] },
+      { text: "您认为职业规划应该从什么时候开始？", type: "single", options: ["小学", "初中", "高中", "大学"] },
+      { text: "您是否愿意让孩子尝试失败（如创业、转专业）？", type: "single", options: ["愿意，成长比成功重要", "可以接受小失败", "尽量避免失败", "不能接受失败"] },
+      { text: "您是否关注学校的生涯教育？", type: "single", options: ["非常关注", "偶尔关注", "不太关注", "从不关注"] },
+      { text: "您是否愿意与学校合作支持孩子职业发展？", type: "single", options: ["非常愿意", "愿意配合", "看情况", "没必要"] },
+      { text: "您是否认为成绩是职业成功的决定因素？", type: "single", options: ["是", "部分是", "不是", "完全不是"] },
+      { text: "您是否了解霍兰德职业兴趣理论等工具？", type: "single", options: ["了解并使用过", "听说过", "不了解", "不感兴趣"] },
+      { text: "您是否愿意带孩子参观工作场所？", type: "single", options: ["愿意", "可以考虑", "没时间", "没必要"] },
+      { text: "您能为孩子提供的最大支持是？（可多选）", type: "multiple", options: ["情感支持", "经济支持", "信息资源", "人脉介绍", "放手让孩子自己探索"] },
+      { text: "您是否担心孩子选择的专业未来不好就业？", type: "single", options: ["非常担心", "有点担心", "不太担心", "相信孩子能适应"] },
+      { text: "您是否愿意接受孩子未来收入不如预期？", type: "single", options: ["愿意，只要他开心", "可以接受短期低收入", "希望至少达到平均水平", "必须高收入"] },
+      { text: "您是否鼓励孩子发展特长或副业？", type: "single", options: ["非常鼓励", "支持但不强求", "担心分散精力", "反对"] },
+      { text: "您是否认为家庭教育对职业发展很重要？", type: "single", options: ["非常重要", "比较重要", "一般", "不重要"] },
+      { text: "您是否愿意学习如何更好地支持孩子职业发展？", type: "single", options: ["非常愿意", "可以试试", "没时间", "没必要"] },
+      { text: "您希望学校提供哪些家长支持服务？（可多选）", type: "multiple", options: ["家长职业讲座", "亲子沟通工作坊", "职业资源包", "专家咨询预约"] },
+      { text: "最后，请用一句话表达您对孩子未来的祝福：", type: "text", options: [] }
+    ];
+
+    function startSurvey(role) {
+      currentRole = role;
+      currentPage = 0;
+      userAnswers = {};
+      document.getElementById('role-section').style.display = 'none';
+      document.getElementById('survey-section').style.display = 'block';
+      renderPage();
+    }
+
+    function renderPage() {
+      const container = document.getElementById('questions-container');
+      const questions = currentRole === 'student' ? studentQuestions : parentQuestions;
+      const start = currentPage * pageSize;
+      const end = Math.min(start + pageSize, questions.length);
+      container.innerHTML = '';
+
+      for (let i = start; i < end; i++) {
+        const q = questions[i];
+        const qDiv = document.createElement('div');
+        qDiv.className = 'question';
+        qDiv.innerHTML = `<div class="question-text">第${i + 1}题：${q.text}</div><div class="options">`;
+
+        if (q.type === 'text') {
+          qDiv.innerHTML += `<textarea id="q${i+1}" placeholder="请输入您的回答..." style="width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; margin-top:8px;" rows="3">${userAnswers[i+1] || ''}</textarea>`;
+        } else if (q.type === 'single') {
+          q.options.forEach((opt, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const checked = userAnswers[i+1] === letter ? 'checked' : '';
+            qDiv.innerHTML += `<label><input type="radio" name="q${i+1}" value="${letter}" ${checked} onchange="saveAnswer(${i+1}, this.value)"> ${opt}</label>`;
+          });
+        } else if (q.type === 'multiple') {
+          q.options.forEach((opt, idx) => {
+            const letter = String.fromCharCode(65 + idx);
+            const isChecked = Array.isArray(userAnswers[i+1]) && userAnswers[i+1].includes(letter);
+            qDiv.innerHTML += `<label><input type="checkbox" value="${letter}" ${isChecked ? 'checked' : ''} onchange="toggleMultiAnswer(${i+1}, this.value, this.checked)"> ${opt}</label>`;
+          });
+        }
+        qDiv.innerHTML += `</div>`;
+        container.appendChild(qDiv);
+      }
+
+      document.querySelector('.prev-btn').style.display = currentPage === 0 ? 'none' : 'inline-block';
+      const isLastPage = end >= questions.length;
+      document.querySelector('.next-btn').style.display = isLastPage ? 'none' : 'inline-block';
+      document.getElementById('submitBtn').style.display = isLastPage ? 'block' : 'none';
+    }
+
+    function saveAnswer(qNum, value) {
+      userAnswers[qNum] = value;
+    }
+
+    function toggleMultiAnswer(qNum, value, checked) {
+      if (!Array.isArray(userAnswers[qNum])) {
+        userAnswers[qNum] = [];
+      }
+      if (checked) {
+        if (!userAnswers[qNum].includes(value)) {
+          userAnswers[qNum].push(value);
+        }
+      } else {
+        userAnswers[qNum] = userAnswers[qNum].filter(v => v !== value);
+      }
+    }
+
+    function nextPage() {
+      currentPage++;
+      renderPage();
+    }
+
+    function prevPage() {
+      currentPage--;
+      renderPage();
+    }
+
+    function collectUnanswered() {
+      const questions = currentRole === 'student' ? studentQuestions : parentQuestions;
+      for (let i = 1; i <= questions.length; i++) {
+        if (userAnswers[i] === undefined || userAnswers[i] === null || 
+           (Array.isArray(userAnswers[i]) && userAnswers[i].length === 0)) {
+          userAnswers[i] = '未作答';
+        }
+      }
+    }
+
+    function generateStudentProfile(answers) {
+      // 推断年龄阶段
+      let ageGroup = "未知";
+      switch(answers[1]) {
+        case 'A': ageGroup = "12–15岁（初中）"; break;
+        case 'B': ageGroup = "15–18岁（高中）"; break;
+        case 'C': ageGroup = "18–22岁（本科）"; break;
+        case 'D': ageGroup = "22岁以上（研究生及以上）"; break;
+        default: ageGroup = "未作答";
+      }
+
+      // 性别
+      const gender = answers[2] === 'A' ? '男' : answers[2] === 'B' ? '女' : '其他/未作答';
+
+      // 兴趣领域
+      const interestFields = [];
+      const fieldMap = ['理工类', '经管类', '人文社科', '艺术设计', '医学健康', '其他'];
+      if (Array.isArray(answers[3])) {
+        answers[3].forEach(opt => {
+          const idx = opt.charCodeAt(0) - 65;
+          if (idx >= 0 && idx < fieldMap.length) interestFields.push(fieldMap[idx]);
+        });
+      }
+
+      // 性格特质
+      const traits = [];
+      if (answers[4] === 'A') traits.push('逻辑思维强');
+      if (answers[4] === 'B') traits.push('社交能力强');
+      if (answers[4] === 'C') traits.push('创造力突出');
+      if (answers[4] === 'D') traits.push('动手能力强');
+      if (answers[4] === 'E') traits.push('组织协调力强');
+
+      if (answers[10] === 'A') traits.push('外向热情');
+      if (answers[10] === 'B') traits.push('内向沉稳');
+      if (answers[10] === 'C') traits.push('理性冷静');
+      if (answers[10] === 'D') traits.push('富有同理心');
+
+      // 霍兰德类型（简化）
+      let hollandType = "综合型";
+      if (interestFields.includes('理工类') || answers[4] === 'A') hollandType = "研究型 (I)";
+      else if (interestFields.includes('经管类') || answers[4] === 'E') hollandType = "企业型 (E)";
+      else if (interestFields.includes('艺术设计') || answers[4] === 'C') hollandType = "艺术型 (A)";
+      else if (answers[4] === 'B') hollandType = "社会型 (S)";
+
+      return { ageGroup, gender, interestFields, traits, hollandType };
+    }
+
+    function generateParentProfile(answers) {
+      const relation = answers[1] === 'A' ? '父亲' : answers[1] === 'B' ? '母亲' : '其他监护人';
+      const childStage = answers[2] === 'A' ? '小学' : answers[2] === 'B' ? '初中' : answers[2] === 'C' ? '高中' : '大学及以上';
+      const education = answers[3] === 'A' ? '高中及以下' : answers[3] === 'B' ? '大专' : answers[3] === 'C' ? '本科' : '硕士及以上';
+      const jobType = answers[4] === 'A' ? '公务员/事业单位' : answers[4] === 'B' ? '企业职员' : answers[4] === 'C' ? '自由职业' : answers[4] === 'D' ? '个体经营' : answers[4] === 'E' ? '退休' : '其他';
+
+      return { relation, childStage, education, jobType };
+    }
+
+    function buildReport(role, answers) {
+      let report = "";
+      const date = new Date().toLocaleString('zh-CN');
+
+      // 获取题目数据
+      const questions = role === 'student' ? studentQuestions : parentQuestions;
+
+      if (role === 'student') {
+        const profile = generateStudentProfile(answers);
+        report += `【职业发展分析报告 — 学生版】\n`;
+        report += `生成时间：${date}\n\n`;
+
+        // ========= 基本信息总结 =========
+        report += `📌 答卷人基本信息总结：\n`;
+        report += `- 身份：学生\n`;
+        report += `- 年龄段：${profile.ageGroup}\n`;
+        report += `- 性别：${profile.gender}\n`;
+        report += `- 感兴趣领域：${profile.interestFields.length ? profile.interestFields.join("、") : "暂无明确方向"}\n`;
+        report += `- 核心性格特质：${profile.traits.length ? profile.traits.join("、") : "未充分反馈"}\n`;
+        report += `- 职业兴趣类型：${profile.hollandType}\n\n`;
+
+        // ========= 答题明细 =========
+        report += `📝 答题明细（共30题）：\n`;
+        for (let i = 1; i <= 30; i++) {
+          const q = questions[i - 1];
+          const ans = answers[i];
+          let answerText = "";
+
+          if (Array.isArray(ans)) {
+            // 多选题
+            answerText = ans.map(val => {
+              if (val === '未作答') return '未作答';
+              const idx = val.charCodeAt(0) - 65; // A=0, B=1...
+              return idx >= 0 && idx < q.options.length ? q.options[idx] : val;
+            }).join("； ");
+          } else if (q.type === 'text') {
+            answerText = ans && ans !== '未作答' ? ans : "未作答";
+          } else {
+            // 单选题
+            if (ans === '未作答') {
+              answerText = "未作答";
+            } else {
+              const idx = ans.charCodeAt(0) - 65;
+              answerText = idx >= 0 && idx < q.options.length ? q.options[idx] : ans;
+            }
+          }
+
+          report += `\n第${i}题：${q.text}\n`;
+          report += `答：${answerText}\n`;
+        }
+
+        // ========= 智能分析 =========
+        const dreamJob = answers[15] !== 'D';
+        const careerAware = answers[17] !== 'D';
+        const hasPlan = answers[28] !== 'C';
+        const confidence = answers[8] === 'A' || answers[8] === 'B';
+
+        report += `\n🔍 关键发现与分析：\n`;
+        report += `- 是否有梦想职业：${dreamJob ? '是' : '否'}\n`;
+        report += `- 是否了解职业要求：${careerAware ? '是' : '否'}\n`;
+        report += `- 是否制定发展规划：${hasPlan ? '是' : '否'}\n`;
+        report += `- 对未来是否有信心：${confidence ? '是' : '否'}\n\n`;
+
+        report += `💡 个性化建议：\n`;
+        if (dreamJob && hasPlan && confidence) {
+          report += `🌟 你已具备良好的职业规划意识！建议继续深化行业调研，积极参与实习实践，建立个人作品集或项目经验。\n`;
+        } else if (!dreamJob && !hasPlan) {
+          report += `💡 建议：可尝试霍兰德职业兴趣测评，参加学校职业讲座或线上公开课（如Coursera、B站），探索兴趣与能力的结合点。\n`;
+        } else {
+          report += `📌 你已迈出探索的第一步！下一步可聚焦1-2个感兴趣方向，制定具体行动计划（如：每月了解1个职业、联系1位从业者访谈）。\n`;
+        }
+
+      } else {
+        const profile = generateParentProfile(answers);
+        report += `【家庭教育支持分析报告 — 家长版】\n`;
+        report += `生成时间：${date}\n\n`;
+
+        // ========= 基本信息总结 =========
+        report += `📌 答卷人基本信息总结：\n`;
+        report += `- 身份：家长\n`;
+        report += `- 与孩子关系：${profile.relation}\n`;
+        report += `- 孩子就读阶段：${profile.childStage}\n`;
+        report += `- 您的学历：${profile.education}\n`;
+        report += `- 您的职业类型：${profile.jobType}\n\n`;
+
+        // ========= 答题明细 =========
+        report += `📝 答题明细（共30题）：\n`;
+        for (let i = 1; i <= 30; i++) {
+          const q = questions[i - 1];
+          const ans = answers[i];
+          let answerText = "";
+
+          if (Array.isArray(ans)) {
+            answerText = ans.map(val => {
+              if (val === '未作答') return '未作答';
+              const idx = val.charCodeAt(0) - 65;
+              return idx >= 0 && idx < q.options.length ? q.options[idx] : val;
+            }).join("； ");
+          } else if (q.type === 'text') {
+            answerText = ans && ans !== '未作答' ? ans : "未作答";
+          } else {
+            if (ans === '未作答') {
+              answerText = "未作答";
+            } else {
+              const idx = ans.charCodeAt(0) - 65;
+              answerText = idx >= 0 && idx < q.options.length ? q.options[idx] : ans;
+            }
+          }
+
+          report += `\n第${i}题：${q.text}\n`;
+          report += `答：${answerText}\n`;
+        }
+
+        // ========= 智能分析 =========
+        const supportsInterest = answers[12] === 'A';
+        const communicates = answers[6] !== 'D';
+        const providesResources = answers[10] === 'A' || answers[10] === 'B';
+
+        report += `\n🔍 关键发现与分析：\n`;
+        report += `- 尊重孩子兴趣选择：${supportsInterest ? '是' : '否'}\n`;
+        report += `- 经常与孩子沟通未来：${communicates ? '是' : '否'}\n`;
+        report += `- 愿意提供资源支持：${providesResources ? '是' : '否'}\n\n`;
+
+        report += `💡 个性化建议：\n`;
+        if (supportsInterest && communicates && providesResources) {
+          report += `👏 您是孩子职业发展的重要支持者！建议进一步参与学校生涯活动，拓展孩子视野，鼓励其接触真实职场。\n`;
+        } else if (!communicates && !supportsInterest) {
+          report += `💡 建议：多倾听孩子的想法，避免仅以“稳定”“高薪”为唯一标准。可每周安排15分钟“未来话题”聊天，了解其内心动力。\n`;
+        } else {
+          report += `🌱 您已在支持路上！可尝试与孩子一起了解新兴职业（如AI训练师、碳中和顾问），共同制定成长计划。\n`;
+        }
+      }
+
+      return report;
+    }
+
+    function submitSurvey() {
+      collectUnanswered();
+      const report = buildReport(currentRole, userAnswers);
+      document.getElementById('result').textContent = report;
+      document.getElementById('survey-section').style.display = 'none';
+      document.getElementById('result-section').style.display = 'block';
+    }
+
+    function downloadReport() {
+      const resultText = document.getElementById('result').textContent;
+      const blob = new Blob([resultText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '职业规划分析报告.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
